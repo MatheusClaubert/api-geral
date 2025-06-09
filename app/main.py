@@ -2,22 +2,15 @@ from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.openapi.docs import get_swagger_ui_html
 from jose import JWTError, jwt
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from starlette.status import HTTP_302_FOUND
-from fastapi.openapi.utils import get_openapi
+from app.auth import SECRET_KEY, ALGORITHM,  create_access_token
+from app.fake_user import fake_user
 
 app = FastAPI(docs_url=None, redoc_url=None) 
-# Dados e config
-SECRET_KEY = "IES_SECRET_KEY"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1
 
-
-
-
-
-# Verificador de autenticação com timezone-aware
 def get_current_user(request: Request):
     token = request.cookies.get("access_token")
     if not token:
@@ -37,31 +30,20 @@ def get_current_user(request: Request):
 
     return username
 
-
-
-
 @app.get("/openapi.json", include_in_schema=False)
 def openapi(request: Request, user: str = Depends(get_current_user)):
     return app.openapi()
 
-# Função para criar token com datetime timezone-aware
-def create_access_token(data: dict):
-    to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-app = FastAPI()
-
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
-
 
 # Página de login
 @app.get("/")
 def home(request: Request):
+    response = templates.TemplateResponse("login.html", {"request": request})
+    response.delete_cookie("access_token")
     return templates.TemplateResponse("login.html", {"request": request})
+
 
 # Rota de login
 @app.post("/login", response_class=HTMLResponse)
@@ -76,9 +58,6 @@ def login(request: Request, username: str = Form(...), password: str = Form(...)
         "request": request,
         "error": "Usuário ou senha inválidos"
     })
-
-# Dependência para proteger as rotas (exemplo proteção /docs)
-from fastapi.openapi.docs import get_swagger_ui_html
 
 @app.get("/docs", include_in_schema=False)
 def custom_swagger_ui_html(request: Request):
