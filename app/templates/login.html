@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Authenticate</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-br from-purple-800 to-indigo-800 min-h-screen flex items-center justify-center px-4">
+  <div class="bg-white shadow-xl rounded-2xl p-8 max-w-sm w-full text-center">
+
+    <img src="/static/grupoeduca.png" alt="Logo IES" class="w-44 mx-auto mb-6" />
+
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Login</h2>
+
+    {% if error %}
+    <div class="bg-red-100 text-red-700 text-sm p-3 mb-4 rounded-md">
+      {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="/login" class="space-y-4 text-left" onsubmit="showLoading()">
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Usuário</label>
+        <input name="username" type="text" required
+          class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500" />
+      </div>
+      <div class="relative">
+        <label class="block text-sm font-medium text-gray-700">Senha</label>
+        <input id="password" name="password" type="password" required
+          class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 pr-10" />
+
+        <button type="button" onclick="togglePassword()"
+          class="absolute right-2 top-9 text-gray-500 hover:text-gray-700">
+          <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+        </button>
+      </div>
+
+      <button id="submitBtn" type="submit"
+        class="w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition flex justify-center items-center">
+        <span id="btnText">Entrar</span>
+        <svg id="spinner" class="ml-2 w-5 h-5 text-white animate-spin hidden" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+      </button>
+    </form>
+  </div>
+
+  <script>
+    function showLoading() {
+      const btnText = document.getElementById('btnText');
+      const spinner = document.getElementById('spinner');
+      btnText.textContent = "Entrando...";
+      spinner.classList.remove('hidden');
+    }
+    window.addEventListener('pageshow', function (event) {
+      if (event.persisted || window.performance && window.performance.getEntriesByType('navigation')[0].type === 'back_forward') {
+        window.location.reload();
+      }
+    });
+
+    function togglePassword() {
+      const password = document.getElementById("password");
+      const eyeIcon = document.getElementById("eyeIcon");
+
+      if (password.type === "password") {
+        password.type = "text";
+        eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.477 0-8.268-2.943-9.542-7a10.05 10.05 0 011.434-3.037M6.75 6.75l10.5 10.5"/>`; // eye-off icon simplified
+      } else {
+        password.type = "password";
+        eyeIcon.innerHTML = `
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+    `;
+      }
+    }
+
+  </script>
+</body>
+
+</html>
